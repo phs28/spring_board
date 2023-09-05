@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.zerock.mapper.ReplyMapper">
+	
+	<insert id="insert">
+		INSERT INTO 
+			tbl_reply
+			(
+				rno,
+				bno,
+				reply,
+				replyer
+			)
+		VALUES
+			(
+				(SELECT NVL(MAX(rno), 0) + 1 FROM tbl_reply),
+				#{bno},
+				#{reply},
+				#{replyer}
+			)
+	</insert>
+	
+	<select id="read" resultType="org.zerock.vo.ReplyVO">
+		<![CDATA[
+			SELECT
+				*
+			FROM
+				tbl_reply
+			WHERE rno = #{bno}asdf
+		]]>
+	</select>
+	
+	<select id="getListWithPaging" resultType="org.zerock.vo.ReplyVO">
+		<![CDATA[
+			SELECT
+				rno,
+				bno,
+				reply,
+				replyer,
+				replyDate,
+				updatedate
+			FROM
+				tbl_reply
+			WHERE bno = #{bno}
+			ORDER BY rno asc
+		]]>
+	</select>
+	
+	<delete id="delete">
+		<![CDATA[
+			DELETE
+			FROM
+				tbl_reply
+			WHERE rno = #{rno}
+		]]>
+	</delete>
+	
+	<update id="update">
+		<![CDATA[
+			UPDATE
+				tbl_reply
+			SET
+				reply = #{reply},
+				updatedate = sysdate
+			WHERE rno = #{rno}
+		]]>
+	</update>
+	
+</mapper>

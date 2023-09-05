@@ -1,0 +1,124 @@
+/**
+ * 댓글 비동기 처리
+ */
+console.log('Reply Module.....');
+
+let replyService = (function() {
+	
+	function add(reply, callback, error) {
+		console.log('add reply.....');
+
+		$.ajax ({
+			type : 'post',
+			url : '/replies/new',
+			data : JSON.stringify(reply),
+			contentType : 'application/json; charset=utf-8',
+			success : function(result, status, xhr) {
+				if(callback) {
+					callback(result);
+				}
+			},
+			error : function(xhr, status, er) {
+				if(error) {
+					error(er);
+				}
+			}
+		});
+	}
+
+    function getList(param, callback, error) {
+
+	    let bno = param.bno;
+	    let page = param.page || 1;
+	    
+	    $.getJSON("/replies/pages/" + bno + "/" + page + ".json",
+	        function(data) {
+	          if (callback) {
+	            callback(data.replyCnt, data.list);
+	          }
+	        }).fail(function(xhr, status, err) {
+	     		if (error) {
+	       			error();
+	      		}
+	    });
+	  }
+
+	function remove(rno, callback, error) {
+		$.ajax({
+			type : 'delete',
+			url : '/replies/' + rno,
+			success : function (deleteResult, status, error) {
+				if(callback) {
+					callback();
+				}
+			},
+			error : function (xhr, status, er) {
+				if(error) {
+					error(er);
+				}
+			}
+		});
+	}
+
+	function update(reply, callback, error) {
+		console.log("RNO: " + reply.rno);
+
+		$.ajax({
+			type : 'put',
+			url : '/replies/' + reply.rno,
+			data : JSON.stringify(reply),
+			contentType : 'application/json; charset=utf-8',
+			success : function (result, status, xhr) {
+				if(callback) {
+					callback(result);
+				}
+			},
+			error : function (xhr, status, er) {
+				if(error) {
+					error(er);
+				}
+			}
+		}); 
+	}
+
+	function get(rno, callback, error) {
+		
+		$.get("/replies/" + rno + ".json", function(result) {
+			if(callback) {
+				callback(result);	
+			}
+		}).fail(function(xhr, status, err) {
+			if(error) {
+				error(err);
+			}
+		});
+	}
+	
+	function formatDate(date) {
+    
+    	let dt = new Date(date);
+    
+   		month = '' + (dt.getMonth() + 1),
+   	 	day = '' + dt.getDate(),
+    	year = dt.getFullYear();
+    
+    	if (month.length < 2){
+    		month = '0' + month;
+    	}  
+    	if (day.length < 2) {
+    		day = '0' + day; 
+    	} 
+    
+    	return [year, month, day].join('-');
+    }
+	
+	return {
+		add:add,
+		getList:getList,
+		remove:remove,
+		update:update,
+		get:get,
+		formatDate:formatDate
+	};
+	
+})();

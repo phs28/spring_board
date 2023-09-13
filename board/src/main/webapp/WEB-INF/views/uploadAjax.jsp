@@ -4,20 +4,33 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Upload with Ajax</title>
+<style type="text/css">
+	.uploadResult {
+		width : 100%;
+		background-color: gray; 
+	}
+	.uploadResult ul {
+		display: flex;
+		flex-flow: row;
+		
+	}
+</style>
 <body>
 	<h1>Upload with Ajax</h1>
 
 	<div class='uploadDiv'>
 		<input type='file' name='uploadFile' multiple>
 	</div>
-
+	
 	<button id='uploadBtn'>Upload</button>
+	<div class="uploadResult">
+		<ul></ul>
+	</div>
 
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js"
 		integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
 		crossorigin="anonymous">
-		
 	</script>
 	<script>
 		var regex = new RegExp("(.*?)\.(exe|sh|zip|alz)$");
@@ -31,7 +44,7 @@
 			}
 
 			if (regex.test(fileName)) {
-				alert("해당 종류의 파일은 업로드할 수 없습니다.");
+				alert("해당 종류의 파일은 업로드 할 수 없습니다.");
 				return false;
 			}
 			return true;
@@ -67,7 +80,7 @@
 					dataType: 'json',
 					success : function(result) {
 						alert("Upload");
-						console.log('upload')
+						showUploadedFile(result);
 						$('.uploadDiv').html(cloneObj.html());
 					},
 					error : function() {
@@ -75,6 +88,18 @@
 					}
 				});
 			});
+			
+			let uploadResult = $(".uploadResult ul");
+			function showUploadedFile(uploadResultArr) {
+				let str = "";
+				
+				$(uploadResultArr).each(function(i, obj) {
+					str += "<li>" + obj.fileName + "</li>";
+				});
+				
+				uploadResult.append(str);
+			}
+			
 		});
 	</script>
 </body>

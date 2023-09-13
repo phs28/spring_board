@@ -13,8 +13,17 @@
 	.uploadResult ul {
 		display: flex;
 		flex-flow: row;
-		
+		justify-content: center;
+		align-items: center;
 	}
+	.uploadResult ul li{
+		list-style: none;
+		padding: 10px;
+	}
+	.uploadResult ul li img{
+		width: 40px;
+	}
+	
 </style>
 <body>
 	<h1>Upload with Ajax</h1>
@@ -34,7 +43,7 @@
 	</script>
 	<script>
 		var regex = new RegExp("(.*?)\.(exe|sh|zip|alz)$");
-		var maxSize = 23100000; //5MB
+		var maxSize = 2310000; //5MB
 
 		function checkExtension(fileName, fileSize) {
 
@@ -91,14 +100,21 @@
 			
 			let uploadResult = $(".uploadResult ul");
 			function showUploadedFile(uploadResultArr) {
+
 				let str = "";
-				
+
 				$(uploadResultArr).each(function(i, obj) {
-					str += "<li>" + obj.fileName + "</li>";
-				});
-				
+						if (!obj.image) {
+							str += "<li><img src='/resources/img/attach.png'>"
+									+ obj.fileName + "</li>";
+						} else {
+							//str += "<li>" + obj.fileName + "</li>";
+							 let fileCallPath =  encodeURIComponent( obj.uploadPath+ "/s_"+obj.uuid +"_"+obj.fileName);
+					         str += "<li><img src='/display?fileName="+fileCallPath+"'><li>";
+						}
+					});
 				uploadResult.append(str);
-			}
+			} 
 			
 		});
 	</script>

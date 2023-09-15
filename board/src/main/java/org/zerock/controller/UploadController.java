@@ -73,6 +73,11 @@ public class UploadController {
 		}
 	}
 	
+	@GetMapping("/uploadAjax")
+	public void uploadAjax() {
+		log.info("upload ajax");
+	}
+	
 	@PostMapping(value = "/uploadAjaxAction", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
 	public ResponseEntity<List<AttachFileDTO>> uploadAjaxPost(MultipartFile[] uploadFile) {
@@ -134,11 +139,6 @@ public class UploadController {
 		return new ResponseEntity<>(list, HttpStatus.OK);
 	}
 	
-	@GetMapping("/uploadAjax")
-	public void uploadAjax() {
-		log.info("upload ajax");
-	}
-	
 	@GetMapping("/display")
 	@ResponseBody
 	public ResponseEntity<byte[]> getFile(String fileName) {
@@ -168,8 +168,16 @@ public class UploadController {
 		log.info("download file: " + fileName);
 		
 		Resource resource = new FileSystemResource("c:\\upload\\" + fileName);
-		log.info(resource);
+		log.info("resource" + resource);
 		
-		return null;
+		String resourceName = resource.getFilename();
+		HttpHeaders headers = new HttpHeaders();
+		try {
+			headers.add("Content-Disposition",  "attachment; filename=" + new String(resourceName.getBytes("UTF-8")));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
 	}
 }

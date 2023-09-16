@@ -2,6 +2,7 @@ package org.zerock.controller;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URLEncoder;
 import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
@@ -21,6 +22,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.zerock.domain.AttachFileDTO;
@@ -31,14 +33,14 @@ import net.coobird.thumbnailator.Thumbnailator;
 @Controller
 @Log4j
 public class UploadController {
-	
+
 	private String getFolder() {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		Date date = new Date();
 		String str = sdf.format(date);
 		return str.replace("-", File.separator);
 	}
-	
+
 	private boolean checkImageType(File file) {
 		try {
 			String contentType = Files.probeContentType(file.toPath());
@@ -46,24 +48,24 @@ public class UploadController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return false;
 	}
-	
+
 	@GetMapping("/uploadForm")
 	public void uploadForm() {
 		log.info("upload form");
 	}
-	
+
 	@PostMapping("/uploadFormAction")
 	public void uploadFormPost(MultipartFile[] uploadFile, Model model) {
 		String uploadFolder = "C:\\upload";
-		
-		for(MultipartFile multipartFile : uploadFile) {
+
+		for (MultipartFile multipartFile : uploadFile) {
 			log.info("-----------------------------------");
 			log.info("upload File Name: " + multipartFile.getOriginalFilename());
 			log.info("upload File Size: " + multipartFile.getSize());
-			
+
 			File saveFile = new File(uploadFolder, multipartFile.getOriginalFilename());
 			try {
 				multipartFile.transferTo(saveFile);
@@ -72,12 +74,12 @@ public class UploadController {
 			}
 		}
 	}
-	
+
 	@GetMapping("/uploadAjax")
 	public void uploadAjax() {
 		log.info("upload ajax");
 	}
-	
+
 	@PostMapping(value = "/uploadAjaxAction", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
 	public ResponseEntity<List<AttachFileDTO>> uploadAjaxPost(MultipartFile[] uploadFile) {
@@ -132,50 +134,65 @@ public class UploadController {
 				list.add(attachDTO);
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error(e);
 			}
 
 		} // end for
 		return new ResponseEntity<>(list, HttpStatus.OK);
 	}
-	
+
 	@GetMapping("/display")
 	@ResponseBody
 	public ResponseEntity<byte[]> getFile(String fileName) {
-		
+
 		log.info("fileName: " + fileName);
 		File file = new File("c:\\upload\\" + fileName);
-		
+
 		log.info("file: " + file);
-		
+
 		ResponseEntity<byte[]> result = null;
-		
+
 		try {
 			HttpHeaders header = new HttpHeaders();
 			header.add("Content-Type", Files.probeContentType(file.toPath()));
-			result = new ResponseEntity<>(FileCopyUtils.copyToByteArray(file),
-					header, HttpStatus.OK);
+			result = new ResponseEntity<>(FileCopyUtils.copyToByteArray(file), header, HttpStatus.OK);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e);
 		}
-		
+
 		return result;
 	}
-	
+
 	@GetMapping(value = "/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
-	public ResponseEntity<Resource> downloadFile(String fileName) {
+	public ResponseEntity<Resource> downloadFile(@RequestHeader("user-Agent") String userAgent, String fileName) {
 		log.info("download file: " + fileName);
 		
 		Resource resource = new FileSystemResource("c:\\upload\\" + fileName);
-		log.info("resource" + resource);
 		
+		if(resource.exists() == false) {
+			return new ResponseEntity<Resource>(HttpStatus.NOT_FOUND);
+		}
 		String resourceName = resource.getFilename();
+		String resourceOrigunalName = resourceName.substring(resourceName.indexOf("-") + 1);
 		HttpHeaders headers = new HttpHeaders();
 		try {
-			headers.add("Content-Disposition",  "attachment; filename=" + new String(resourceName.getBytes("UTF-8")));
+			String downloadName = null;
+			if(userAgent.contains("Trident")) {
+				log.info("IE broweser");
+				downloadName = URLEncoder.encode(resourceOrigunalName, "UTF-8").replace("\\+", "");
+			} else if(userAgent.contains("Edge")) {
+				log.info("Edge browser");
+				downloadName = URLEncoder.encode(resourceOrigunalName, "UTF-8");
+				log.info("Edge name: " + downloadName);
+			} else {
+				log.info("CHrome broweser");
+				downloadName = new String(resourceOrigunalName.getBytes("UTF-8"), "ISO-8859-1");
+			}
+			
+			headers.add("Content-Disposition",  "attachment; filename=" + downloadName);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e);
 		}
 		
 		return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);

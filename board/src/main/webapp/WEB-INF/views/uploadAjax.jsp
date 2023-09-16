@@ -42,27 +42,30 @@
 		crossorigin="anonymous">
 	</script>
 	<script>
-		var regex = new RegExp("(.*?)\.(exe|sh|zip|alz)$");
-		var maxSize = 2310000; //5MB
-
-		function checkExtension(fileName, fileSize) {
-
-			if (fileSize >= maxSize) {
-				alert("파일 사이즈 초과");
-				return false;
-			}
-
-			if (regex.test(fileName)) {
-				alert("해당 종류의 파일은 업로드 할 수 없습니다.");
-				return false;
-			}
-			return true;
+		function showImage(fileCallPath) {
+			
 		}
-
-		var cloneObj = $(".uploadDiv").clone();
 		
 		$(document).ready(function() {
+			var regex = new RegExp("(.*?)\.(exe|sh|zip|alz)$");
+			var maxSize = 2310000; //5MB
 
+			function checkExtension(fileName, fileSize) {
+
+				if (fileSize >= maxSize) {
+					alert("파일 사이즈 초과");
+					return false;
+				}
+
+				if (regex.test(fileName)) {
+					alert("해당 종류의 파일은 업로드 할 수 없습니다.");
+					return false;
+				}
+				return true;
+			}
+
+			var cloneObj = $(".uploadDiv").clone();
+			
 			$("#uploadBtn").on("click", function(e) {
 
 				var formData = new FormData();
@@ -105,12 +108,12 @@
 
 				$(uploadResultArr).each(function(i, obj) {
 						if (!obj.image) {
-							str += "<li><img src='/resources/img/attach.png'>"
-									+ obj.fileName + "</li>";
+							let fileCallPath = encodeURIComponent(obj.uploadPath+"/"+obj.uuid+"_"+obj.fileName);
+							str += "<li><a href='/download?fileName="+fileCallPath+"'>"+"<img src='/resources/img/attach.png'>"+obj.fileName+"</a></li>"
 						} else {
 							//str += "<li>" + obj.fileName + "</li>";
 							 let fileCallPath =  encodeURIComponent( obj.uploadPath+ "/s_"+obj.uuid +"_"+obj.fileName);
-					         str += "<li><img src='/display?fileName="+fileCallPath+"'><li>";
+					     str += "<li><img src='/display?fileName="+fileCallPath+"'><li>";
 						}
 					});
 				uploadResult.append(str);

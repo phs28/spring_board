@@ -2,7 +2,53 @@
     pageEncoding="utf-8"%>
     
 	<%@include file="../includes/header.jsp" %>
+	<style>
+.uploadResult {
+  width:100%;
+  background-color: gray;
+}
+.uploadResult ul{
+  display:flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+}
+.uploadResult ul li {
+  list-style: none;
+  padding: 10px;
+  align-content: center;
+  text-align: center;
+}
+.uploadResult ul li img{
+  width: 100px;
+}
+.uploadResult ul li span {
+  color:white;
+}
+.bigPictureWrapper {
+  position: absolute;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  top:0%;
+  width:100%;
+  height:100%;
+  background-color: gray; 
+  z-index: 100;
+  background:rgba(255,255,255,0.5);
+}
+.bigPicture {
+  position: relative;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
 
+.bigPicture img {
+  width:600px;
+}
+
+</style>
 		<div id="page-wrapper">
 			<div class="row">
 				<div class="col-lg-12">
@@ -44,8 +90,8 @@
 								<input type='hidden' name='bno' value='${board.bno}'>
 							</form>
                             
-                            <button type="button" class='btn btn-defult modBtn' >Modify</button>
-                            <button type="button" class='btn btn-info listBtn' onclick="location.href='/board/list'">list</button>
+                 <button type="button" class='btn btn-defult modBtn' >Modify</button>
+                 <button type="button" class='btn btn-info listBtn' onclick="location.href='/board/list'">list</button>
                             
 						</div>
 						<!-- /.panel-body -->
@@ -54,13 +100,30 @@
 				</div>
 				<!-- /.col-lg-12 -->
 			</div>
-	</div>
-	<!-- /#wrapper -->
-	
-<div class='row'>
+			<div class='row'>
 
- 	 <div class="col-lg-12">
+	 	<div class="col-lg-12">
+		
+		<div class="row">
+  		<div class="col-lg-12">
+    		<div class="panel panel-default">
 
+      	<div class="panel-heading">Files</div>
+      <!-- /.panel-heading -->
+	     	 <div class="panel-body">
+		        
+		      <div class='uploadResult'> 
+		          <ul>
+		          </ul>
+		        </div>
+		      </div>
+		      <!--  end panel-body -->
+		    </div>
+		    <!--  end panel-body -->
+		  </div>
+		  <!-- end panel -->
+		</div>
+<!-- /.row -->
     <!-- /.panel -->
     <div class="panel panel-default">
       
@@ -86,6 +149,10 @@
   </div>
   <!-- ./ end row -->
 </div>
+			
+	</div>
+	<!-- /#wrapper -->
+	
 
 <!-- Modal -->
       <div class="modal fade" id="myModal" tabindex="-1" role="dialog"
@@ -110,14 +177,14 @@
                 <label>Reply Date</label> 
                 <input class="form-control" name='replyDate' value=''>
               </div>
-      
             </div>
-	  <div class="modal-footer">
-        <button id='modalModBtn' type="button" class="btn btn-warning">Modify</button>
-        <button id='modalRemoveBtn' type="button" class="btn btn-danger">Remove</button>
-        <button id='modalRegisterBtn' type="button" class="btn btn-primary">Register</button>
-        <button id='modalCloseBtn' type="button" class="btn btn-default">Close</button>
-      </div>          </div>
+		  	<div class="modal-footer">
+	        <button id='modalModBtn' type="button" class="btn btn-warning">Modify</button>
+	        <button id='modalRemoveBtn' type="button" class="btn btn-danger">Remove</button>
+	        <button id='modalRegisterBtn' type="button" class="btn btn-primary">Register</button>
+	        <button id='modalCloseBtn' type="button" class="btn btn-default">Close</button>
+	      </div>          
+      </div>
           <!-- /.modal-content -->
         </div>
         <!-- /.modal-dialog -->
@@ -298,7 +365,7 @@
 		});
 		
 		modalRemoveBtn.on("click", function(e) {
-			let rno = modal.data("rno"); 			
+			let rno = modal.data("rno");
 			
 			replyService.remove(rno, function(result) {
 				modal.modal("hide");
@@ -309,44 +376,6 @@
 	
   	
 	$(document).ready(function () {
-		
-// 		let bnoValue = '${board.bno}';
-		
-// 		replyService.getList({bno:bnoValue, page:1}, function(list) {
-			
-// 			for(var i=0, len = list.length||0; i<len; i++) {
-// 				console.log(list[i]);
-// 			}
-// 		});
-// 		replyService.get(10, function (data) {
-// 			console.log(data);
-// 		});
-		
-// 		replyService.update({
-// 			rno : 21,
-// 			bno : bnoValue,
-// 			reply : 'Modified Reply..'
-// 		}, function (result) {
-// 			alert("수정완료");
-// 		});
-		
-// 		replyService.add(
-// 			{reply:'JS TEST', replyer:'tester', bno:bnoValue}
-// 			,
-// 			function (result) {
-// 				alert("RESULT: " + result);
-// 			}
-// 		);
-		
-// 		replyService.remove(20, function (count) {
-// 			console.log(count);
-			
-// 			if(count == 'success') {
-// 				alert('REMOVED');
-// 			}
-// 		}, function (err) {
-// 			alert('ERROR...');
-// 		});
 		
 		let actionForm = $("#actionForm");	
 		
@@ -360,28 +389,29 @@
 			e.preventDefault();
 			actionForm.attr("action", "/board/modify.do");
 			actionForm.submit();
-		});	
+		});
+		
+		(function() {
+			let bno = '<c:out value="${board.bno}"/>';
+			$.getJSON("/board/getAttachList", {bno:bno}, function(arr) {
+				console.log(arr);
+				
+				let str = "";
+				
+				$(arr).each(function(i, attach) {
+					//image type
+					if(attach.fileType) {
+						let fileCallPath = encodeURIComponent(attch.uploadPath+"/s_"+attach.uuid+"_"+attach.fileName);
+						
+						str += "<li data-path='"+attach.uploadPath+"' data-uuid='"+attach.uuid+"' data-fileName='"+fileName+"' data-type='"+attach.flieType+"'>;
+						str += "<div><img src='' >"
+					}
+				});
+				
+			});
+		})();
+		
 	});
-// 		let operForm = $('#operForm');
-		
-// 		$('button[data-oper="modify"]').on('click', function (e) {
-// 			e.preventDefault();
-			
-// 			operForm.attr("action", "/board/modify");
-// 			operForm.attr("method", "get");
-// 			operForm.submit();
-// 		})
-		
-// 		$('button[data-oper="list"]').on('click', function (e) {
-// 		e.preventDefault();
-			
-// 		operForm.find('#bno').remove();
-// 		operForm.attr("action", "/board/list");
-// 		operForm.attr("method", "get");
-// 		operForm.submit();
-//		 })
-		
-		
 	</script>
 	
 	<%@include file="../includes/footer.jsp"%>

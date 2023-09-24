@@ -94,7 +94,6 @@ $(document).ready(function(e){
       
       var jobj = $(obj);
       
-      console.dir(jobj);
       console.log("-------------------------");
       console.log(jobj.data("filename"));
       
@@ -132,9 +131,7 @@ $(document).ready(function(e){
   $("input[type='file']").change(function(e){
 
 	  let formData = new FormData();
-    
 	  let inputFile = $("input[name='uploadFile']");
-    
 	  let files = inputFile[0].files;
     
     for(let i = 0; i < files.length; i++){

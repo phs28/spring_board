@@ -27,6 +27,12 @@
 		WHERE uuid = #{uuid}
 	</delete>
 	
+	<delete id="deleteAll">
+		DELETE
+			tbl_attach
+		WHERE bno = #{bno}
+	</delete>
+	
 	<select id="findByBno" resultType="org.zerock.domain.BoardAttachVO">
 		SELECT 
 			*

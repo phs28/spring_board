@@ -50,28 +50,34 @@ public class BoardServiceImpl implements BoardService {
 		return mapper.read(bno);
 	}
 
+	@Transactional
 	@Override
 	public boolean modify(BoardVO vo) {
 		
-		int up = mapper.update(vo);
-		if(up == 1) {
-			return true;
+		log.info("modify......." + vo);
+		
+		attachMapper.deleteAll(vo.getBno());
+		
+		boolean modifyResult = mapper.update(vo) == 1;
+		if(modifyResult && vo.getAttachList() != null && vo.getAttachList().size() > 0) {
+			vo.getAttachList().forEach(attach -> {
+				attach.setBno(vo.getBno());
+				attachMapper.insert(attach);
+			});
 		}
-		
-		log.info("modify.." + up);
-		
-		return false;
+			
+		return modifyResult;
 	}
-
+	
+	@Transactional
 	@Override
 	public boolean remove(long bno) {
 		
-		int re = mapper.delete(bno);
-		if(re == 1) {
-			return true;
-		}
+		log.info("remove...." + bno);
 		
-		return false;
+		attachMapper.deleteAll(bno);
+		
+		return mapper.delete(bno) == 1;
 	}
 
 //	@Override
